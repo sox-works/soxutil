@@ -1,0 +1,142 @@
+#!/usr/bin/env bash
+# soxutil - swiss army CLI tool for volume, workspaces, music, wifi, bt, etc.
+
+set -e
+
+cmd=$1; shift || true
+
+vol_cmd() {
+  case "$1" in
+    mute) wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle ;;
+    +*|-*|[0-9]*) wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ "$1"% ;;
+    status) wpctl get-volume @DEFAULT_AUDIO_SINK@ ;;
+    *) echo "Usage: soxutil vol [N|+N|-N|mute|status]" ;;
+  esac
+}
+
+wrkspc_cmd() {
+  case "$1" in
+    list) hyprctl workspaces || swaymsg -t get_workspaces ;;
+    send) shift; hyprctl dispatch movetoworkspace "$1" || swaymsg move container to workspace "$1" ;;
+    [0-9]*) hyprctl dispatch workspace "$1" || swaymsg workspace "$1" ;;
+    *) echo "Usage: soxutil wrkspc [list|N|send N]" ;;
+  esac
+}
+
+msc_cmd() {
+  case "$1" in
+    play|pause|toggle) playerctl play-pause ;;
+    next) playerctl next ;;
+    prev) playerctl previous ;;
+    stop) playerctl stop ;;
+    status) playerctl status ;;
+    time) playerctl metadata --format '{{position}} / {{mpris:length}}' ;;
+    seek) shift; playerctl position "$1" ;;
+    *) echo "Usage: soxutil msc [play|next|prev|stop|status|time|seek N]" ;;
+  esac
+}
+
+refresh_cmd() {
+  (pkill waybar && waybar & disown) || true
+  (pkill hyprpaper && hyprpaper & disown) || true
+  (pkill dunst && dunst & disown) || true
+  echo "[soxutil] Refreshed compositor/bar/wallpaper/daemons."
+}
+
+net_cmd() {
+  case "$1" in
+    list) nmcli dev wifi list ;;
+    connect) shift; ssid=$(nmcli -t -f SSID dev wifi list | grep -i "$1" | head -n1)
+             if [ -n "$ssid" ]; then nmcli dev wifi connect "$ssid"; else echo "[soxutil] No match."; fi ;;
+    disconnect) nmcli dev disconnect wlan0 ;;
+    *) echo "Usage: soxutil net [list|connect PATTERN|disconnect]" ;;
+  esac
+}
+
+bt_cmd() {
+  case "$1" in
+    list) bluetoothctl devices ;;
+    connect) shift; dev=$(bluetoothctl devices | grep -i "$1" | awk '{print $2}' | head -n1)
+             [ -n "$dev" ] && bluetoothctl connect "$dev" || echo "[soxutil] No match." ;;
+    disconnect) shift; dev=$(bluetoothctl devices | grep -i "$1" | awk '{print $2}' | head -n1)
+             [ -n "$dev" ] && bluetoothctl disconnect "$dev" || echo "[soxutil] No match." ;;
+    *) echo "Usage: soxutil bt [list|connect PATTERN|disconnect PATTERN]" ;;
+  esac
+}
+
+sys_cmd() {
+  echo "=== System Info ==="
+  uname -a
+  echo "=== Uptime ==="
+  uptime
+  echo "=== Memory ==="
+  free -h
+  echo "=== Disk ==="
+  df -h /
+  echo "=== Battery ==="
+  upower -i $(upower -e | grep BAT) | grep -E "state|to full|to empty|percentage"
+}
+
+scrot_cmd() {
+  case "$1" in
+    f) grim ~/Pictures/Screenshots/shot-$(date +%s).png ;;
+    w) grim -g "$(slurp -w)" ~/Pictures/Screenshots/window-$(date +%s).png ;;
+    s) grim -g "$(slurp)" ~/Pictures/Screenshots/sel-$(date +%s).png ;;
+    *) echo "Usage: soxutil scrot [f|w|s]" ;;
+  esac
+}
+
+setup_cmd() {
+  pkgs=(playerctl network-manager bluez grim slurp jq upower man-db)
+  missing=()
+  for p in "${pkgs[@]}"; do
+    if ! command -v $p &>/dev/null; then
+      missing+=("$p")
+    fi
+  done
+
+  if [[ ${#missing[@]} -ne 0 ]]; then
+    echo "[soxutil] Installing: ${missing[*]}"
+    if command -v pacman &>/dev/null; then
+      sudo pacman -S --needed ${missing[*]}
+    elif command -v apt &>/dev/null; then
+      sudo apt install -y ${missing[*]}
+    elif command -v dnf &>/dev/null; then
+      sudo dnf install -y ${missing[*]}
+    else
+      echo "[soxutil] Unknown package manager, please install manually: ${missing[*]}"
+    fi
+  fi
+
+  # Install binary
+  mkdir -p ~/.local/bin
+  cp "$(realpath "$0")" ~/.local/bin/soxutil
+  echo "[soxutil] Installed script to ~/.local/bin/soxutil"
+
+  # Install man page
+  if [ -f "./soxutil.1" ]; then
+    mkdir -p ~/.local/share/man/man1
+    cp ./soxutil.1 ~/.local/share/man/man1/
+    mandb ~/.local/share/man >/dev/null 2>&1 || true
+    echo "[soxutil] Man page installed. Try 'man soxutil'"
+  else
+    echo "[soxutil] soxutil.1 man page not found in repo."
+  fi
+
+  echo "[soxutil] Setup complete ✅"
+}
+
+case "$cmd" in
+  vol) vol_cmd "$@" ;;
+  wrkspc) wrkspc_cmd "$@" ;;
+  msc) msc_cmd "$@" ;;
+  refresh) refresh_cmd ;;
+  net) net_cmd "$@" ;;
+  bt) bt_cmd "$@" ;;
+  sys) sys_cmd ;;
+  scrot) scrot_cmd "$@" ;;
+  setup) setup_cmd ;;
+  ""|help) echo "Usage: soxutil [vol|wrkspc|msc|refresh|net|bt|sys|scrot|setup]" ;;
+  *) echo "[soxutil] Unknown command: $cmd" ;;
+esac
+

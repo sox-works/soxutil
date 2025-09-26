@@ -1,0 +1,39 @@
+.TH SOXUTIL 1 "September 2025" "soxutil 1.0" "User Commands"
+.SH NAME
+soxutil \- swiss-army CLI utility for volume, workspaces, music, wifi, bt, etc.
+.SH SYNOPSIS
+.B soxutil
+[\fIcommand\fR] [\fIargs\fR]
+.SH DESCRIPTION
+\fBsoxutil\fR is a personal utility script that wraps multiple system tools
+into one simple interface.
+.SH COMMANDS
+.TP
+.B vol [0-100|+N|-N|mute]
+Control volume.
+.TP
+.B wrkspc [list|N|send N]
+Workspace management.
+.TP
+.B msc [play|next|prev|stop|status|time]
+Music player control via MPRIS.
+.TP
+.B net [list|connect PATTERN|disconnect]
+Wi-Fi control with fuzzy search.
+.TP
+.B bt [list|connect PATTERN|disconnect PATTERN]
+Bluetooth control with fuzzy search.
+.TP
+.B sys
+Show system information.
+.TP
+.B scrot [f|w|s]
+Take screenshots (full, window, selection).
+.TP
+.B refresh
+Reload compositor, bar, wallpaper, and daemons.
+.TP
+.B setup
+Install dependencies required for soxutil.
+.SH AUTHOR
+Written by sox
