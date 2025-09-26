@@ -45,7 +45,7 @@ That’s it. After this:
 
 ---
 
-## 🖥️ Examples
+##  Examples
 
 ```bash
 soxutil vol +10         # bump volume up
@@ -56,7 +56,7 @@ soxutil scrot s         # screenshot a region
 
 ---
 
-## ⚡ Dependencies
+##  Dependencies
 
 The `setup` command installs everything you need, but here’s what’s under the hood:
 
