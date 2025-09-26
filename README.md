@@ -72,7 +72,3 @@ The `setup` command installs everything you need, but here’s what’s under th
 ## ✨ Why use this?
 
 Because typing `soxutil vol mute` is way nicer than memorizing obscure commands.
-
-``` 
-Do you want me to also write a **tiny usage cheat sheet** (like a table of commands → what they do) for the README, or keep it as-is?
-```
