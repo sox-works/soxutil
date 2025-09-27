@@ -50,7 +50,8 @@ To update, just :
 ```bash
 cd soxutil
 git pull
-soxutil setup
+chmod +x soxutil
+./soxutil setup
 ```
 and now, your install should be up to date.
 
