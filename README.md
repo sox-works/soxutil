@@ -32,7 +32,7 @@ So I made **`soxutil`** — a single command that wraps all the random system to
 ## 📦 Installation
 
 ```bash
-git clone https://github.com/you/soxutil
+git clone https://github.com/sox-works/soxutil
 cd soxutil
 chmod +x soxutil
 ./soxutil setup
@@ -42,6 +42,15 @@ That’s it. After this:
 
 * Run `soxutil` from anywhere
 * Run `man soxutil` to see the man page
+Please note that directory where you cloned this repo will also be used for updates.
+
+## Updates
+To update, just :
+```bash
+git pull
+soxutil setup
+```
+and now, your install should be up to date.
 
 ---
 
