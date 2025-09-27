@@ -42,11 +42,13 @@ That’s it. After this:
 
 * Run `soxutil` from anywhere
 * Run `man soxutil` to see the man page
-Please note that directory where you cloned this repo will also be used for updates.
+
+Please note that the directory where you cloned the repo will be used for updates as well.
 
 ## Updates
 To update, just :
 ```bash
+cd soxutil
 git pull
 soxutil setup
 ```
